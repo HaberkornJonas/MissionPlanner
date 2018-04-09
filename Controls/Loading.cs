@@ -27,47 +27,26 @@ namespace MissionPlanner.Controls
             InitializeComponent();
         }
 
-        public new string Text 
+        ~Loading()
         {
-            get { return label1.Text; }
-            set
-            {
-                if (this.IsHandleCreated && !IsDisposed)
-                {
-                    if (this.InvokeRequired)
-                    {
-                        this.Invoke((MethodInvoker) delegate
-                        {
-                            label1.Text = value;
-                            this.Focus();
-                            this.Refresh();
-                        });
-                    }
-                    else
-                    {
-                        label1.Text = value;
-                        this.Focus();
-                        this.Refresh();
-                    }
-                }
-            }
+            Instance = null;
         }
+
+        public new string Text { get; set; }
 
         public new static void Close()
         {
             log.Info("Loading.Close()");
-            if (Instance != null)
+            lock (locker)
             {
-                if (!Instance.IsDisposed)
+                if (Instance != null)
                 {
-                    if (Instance.IsHandleCreated)
+                    if (!Instance.IsDisposed)
                     {
-                        lock (locker)
+                        if (Instance.IsHandleCreated)
                         {
-                            MainV2.instance.Invoke((MethodInvoker) delegate
-                            {
-                                ((Form) Instance).Close();
-                            });
+
+                            MainV2.instance.Invoke((MethodInvoker) delegate { ((Form) Instance).Close(); });
 
                             Instance = null;
                         }
@@ -122,10 +101,12 @@ namespace MissionPlanner.Controls
 
         private static void Frm_Closing(object sender, CancelEventArgs e)
         {
-            lock (locker)
-            {
-                Instance = null;
-            }
+            Instance = null;
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            label1.Text = Text;
         }
     }
 }

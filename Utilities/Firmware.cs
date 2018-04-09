@@ -13,6 +13,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
@@ -25,6 +26,8 @@ namespace MissionPlanner.Utilities
 
         public event ProgressEventHandler Progress;
 
+        //http://firmware.ardupilot.org/manifest.json
+
         string firmwareurl = "https://raw.github.com/diydrones/binary/master/Firmware/firmware2.xml";
 
         readonly string gholdurl = ("https://github.com/diydrones/binary/raw/!Hash!/Firmware/firmware2.xml");
@@ -33,8 +36,6 @@ namespace MissionPlanner.Utilities
         string[] gholdurls = new string[] {};
 
         public List<KeyValuePair<string, string>> niceNames = new List<KeyValuePair<string, string>>();
-
-        int ingetapmversion = 0;
 
         List<software> softwares = new List<software>();
 
@@ -49,11 +50,13 @@ namespace MissionPlanner.Utilities
             public string urlpx4v2;
             public string urlpx4v3;
             public string urlpx4v4;
+            public string urlpx4v4pro;
             public string urlvrbrainv40;
             public string urlvrbrainv45;
             public string urlvrbrainv50;
             public string urlvrbrainv51;
             public string urlvrbrainv52;
+            public string urlvrbrainv54;
             public string urlvrcorev10;
             public string urlvrubrainv51;
             public string urlvrubrainv52;
@@ -96,7 +99,7 @@ namespace MissionPlanner.Utilities
         /// </summary>
         public Firmware()
         {
-            string file = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar +
+            string file = Path.GetDirectoryName(Path.GetFullPath(Assembly.GetExecutingAssembly().Location)) + Path.DirectorySeparatorChar +
                           "FirmwareHistory.txt";
 
             if (!File.Exists(file))
@@ -148,8 +151,6 @@ namespace MissionPlanner.Utilities
                 firmwareurl = this.firmwareurl;
 
             // mirror support
-            L10N.ReplaceMirrorUrl(ref firmwareurl);
-
             log.Info("getFWList");
 
             string url = "";
@@ -159,11 +160,13 @@ namespace MissionPlanner.Utilities
             string px4v2 = "";
             string px4v3 = "";
             string px4v4 = "";
+            string px4v4pro = "";
             string vrbrainv40 = "";
             string vrbrainv45 = "";
             string vrbrainv50 = "";
             string vrbrainv51 = "";
             string vrbrainv52 = "";
+            string vrbrainv54 = "";
             string vrcorev10 = "";
             string vrubrainv51 = "";
             string vrubrainv52 = "";
@@ -216,6 +219,9 @@ namespace MissionPlanner.Utilities
                             case "urlpx4v4":
                                 px4v4 = xmlreader.ReadString();
                                 break;
+                            case "urlpx4v4pro":
+                                px4v4pro = xmlreader.ReadString();
+                                break;								
                             case "urlvrbrainv40":
                                 vrbrainv40 = xmlreader.ReadString();
                                 break;
@@ -230,6 +236,9 @@ namespace MissionPlanner.Utilities
                                 break;
                             case "urlvrbrainv52":
                                 vrbrainv52 = xmlreader.ReadString();
+                                break;
+                            case "urlvrbrainv54":
+                                vrbrainv54 = xmlreader.ReadString();
                                 break;
                             case "urlvrcorev10":
                                 vrcorev10 = xmlreader.ReadString();
@@ -267,44 +276,19 @@ namespace MissionPlanner.Utilities
                                     temp.urlpx4v2 = px4v2;
                                     temp.urlpx4v3 = px4v3;
                                     temp.urlpx4v4 = px4v4;
+                                    temp.urlpx4v4pro = px4v4pro;
                                     temp.urlvrbrainv40 = vrbrainv40;
                                     temp.urlvrbrainv45 = vrbrainv45;
                                     temp.urlvrbrainv50 = vrbrainv50;
                                     temp.urlvrbrainv51 = vrbrainv51;
                                     temp.urlvrbrainv52 = vrbrainv52;
+                                    temp.urlvrbrainv54 = vrbrainv54;
                                     temp.urlvrcorev10 = vrcorev10;
                                     temp.urlvrubrainv51 = vrubrainv51;
                                     temp.urlvrubrainv52 = vrubrainv52;
                                     temp.urlbebop2 = bebop2;
                                     temp.urldisco = disco;
                                     temp.k_format_version = k_format_version;
-
-                                    try
-                                    {
-                                        try
-                                        {
-                                            if (!url2560.Contains("github"))
-                                            {
-                                                //name = 
-
-                                                lock (this)
-                                                {
-                                                    ingetapmversion++;
-                                                }
-
-                                                System.Threading.ThreadPool.QueueUserWorkItem(getAPMVersion, temp);
-
-                                                //if (name != "")
-                                                //temp.name = name;
-                                            }
-                                        }
-                                        catch
-                                        {
-                                        }
-                                    }
-                                    catch
-                                    {
-                                    } // just in case
 
                                     softwares.Add(temp);
                                 }
@@ -315,11 +299,13 @@ namespace MissionPlanner.Utilities
                                 px4v2 = "";
                                 px4v3 = "";
                                 px4v4 = "";
+                                px4v4pro = "";
                                 vrbrainv40 = "";
                                 vrbrainv45 = "";
                                 vrbrainv50 = "";
                                 vrbrainv51 = "";
                                 vrbrainv52 = "";
+                                vrbrainv54 = "";
                                 vrcorev10 = "";
                                 vrubrainv51 = "";
                                 vrubrainv52 = "";
@@ -335,6 +321,17 @@ namespace MissionPlanner.Utilities
                         }
                     }
                 }
+
+                Parallel.ForEach(softwares, software =>
+                {
+                    try
+                    {
+                        getAPMVersion(software);
+                    }
+                    catch
+                    {
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -342,9 +339,6 @@ namespace MissionPlanner.Utilities
                 //CustomMessageBox.Show("Failed to get Firmware List : " + ex.Message);
                 throw;
             }
-
-            while (ingetapmversion > 0)
-                System.Threading.Thread.Sleep(100);
 
             log.Info("load done");
 
@@ -411,8 +405,6 @@ namespace MissionPlanner.Utilities
 
                 if (baseurl == "" || !baseurl.ToLower().StartsWith("http")) return;
 
-                L10N.ReplaceMirrorUrl(ref baseurl);
-
                 Uri url = new Uri(new Uri(baseurl), "git-version.txt");
 
                 log.Info("Get url " + url.ToString());
@@ -421,30 +413,30 @@ namespace MissionPlanner.Utilities
 
                 WebRequest wr = WebRequest.Create(url);
                 wr.Timeout = 10000;
-                WebResponse wresp = wr.GetResponse();
-
-                StreamReader sr = new StreamReader(wresp.GetResponseStream());
-
-                while (!sr.EndOfStream)
+                using (WebResponse wresp = wr.GetResponse())
+                using (StreamReader sr = new StreamReader(wresp.GetResponseStream()))
                 {
-                    string line = sr.ReadLine();
-
-                    if (line.Contains("APMVERSION:"))
+                    while (!sr.EndOfStream)
                     {
-                        log.Info(line);
+                        string line = sr.ReadLine();
 
-                        // get index
-                        var index = softwares.IndexOf(temp);
-                        // get item to modify
-                        var item = softwares[index];
-                        // move existing name
-                        item.desc = item.name;
-                        // change name
-                        item.name = line.Substring(line.IndexOf(':') + 2);
-                        // save back to list
-                        softwares[index] = item;
+                        if (line.Contains("APMVERSION:"))
+                        {
+                            log.Info(line);
 
-                        return;
+                            // get index
+                            var index = softwares.IndexOf(temp);
+                            // get item to modify
+                            var item = softwares[index];
+                            // move existing name
+                            item.desc = item.name;
+                            // change name
+                            item.name = line.Substring(line.IndexOf(':') + 2);
+                            // save back to list
+                            softwares[index] = item;
+
+                            return;
+                        }
                     }
                 }
 
@@ -453,13 +445,6 @@ namespace MissionPlanner.Utilities
             catch (Exception ex)
             {
                 log.Error(ex);
-            }
-            finally
-            {
-                lock (this)
-                {
-                    ingetapmversion--;
-                }
             }
         }
 
@@ -512,7 +497,7 @@ namespace MissionPlanner.Utilities
                 else if (board == BoardDetect.boards.px4v3)
                 {
                     baseurl = temp.urlpx4v3.ToString();
-                    if (String.IsNullOrEmpty(baseurl) || !Common.CheckHTTPFileExists(baseurl))
+                    if (String.IsNullOrEmpty(baseurl) || !Download.CheckHTTPFileExists(baseurl))
                     {
                         baseurl = temp.urlpx4v2.ToString();
                     }
@@ -521,6 +506,10 @@ namespace MissionPlanner.Utilities
                 {
                     baseurl = temp.urlpx4v4.ToString();
                 }
+                else if (board == BoardDetect.boards.px4v4pro)
+                {
+                    baseurl = temp.urlpx4v4pro.ToString();
+                }				
                 else if (board == BoardDetect.boards.vrbrainv40)
                 {
                     baseurl = temp.urlvrbrainv40.ToString();
@@ -540,6 +529,10 @@ namespace MissionPlanner.Utilities
                 else if (board == BoardDetect.boards.vrbrainv52)
                 {
                     baseurl = temp.urlvrbrainv52.ToString();
+                }
+                else if (board == BoardDetect.boards.vrbrainv54)
+                {
+                    baseurl = temp.urlvrbrainv54.ToString();
                 }
                 else if (board == BoardDetect.boards.vrcorev10)
                 {
@@ -576,8 +569,6 @@ namespace MissionPlanner.Utilities
                     baseurl = getUrl(historyhash, baseurl);
 
                 // update to use mirror url
-                L10N.ReplaceMirrorUrl(ref baseurl);
-
                 log.Info("Using " + baseurl);
 
                 var starttime = DateTime.Now;
@@ -988,11 +979,11 @@ namespace MissionPlanner.Utilities
             PingReply pingReply = pingParrotVehicle(ping);
 
             updateProgress(0, "Trying to connect to " + vehicleName);
-
+            
             if (pingReply == null || pingReply.Status != IPStatus.Success)
             {
                 bool ssidFound = isParrotWifiConnected(vehicleName);
-
+                
                 if (!ssidFound)
                 {
                     CustomMessageBox.Show("Please connect to " + vehicleName + " Wifi now and after that press OK", vehicleName, MessageBoxButtons.OK);
@@ -1004,12 +995,12 @@ namespace MissionPlanner.Utilities
                 {
                     if (!ssidFound)
                     {
-                        if (CustomMessageBox.Show("You don't seem connected to " + vehicleName + " Wifi. Please connect to it and press OK to try again", vehicleName, MessageBoxButtons.OKCancel) == DialogResult.Cancel)
+                        if (CustomMessageBox.Show("You don't seem connected to " + vehicleName + " Wifi. Please connect to it and press OK to try again", vehicleName, MessageBoxButtons.OKCancel) == (int)DialogResult.Cancel)
                         {
                             return false;
                         }
                     }
-                    else if (CustomMessageBox.Show("You seem connected to " + vehicleName + " Wifi but it didn't answer our request. Do you want to try again?", vehicleName, MessageBoxButtons.OKCancel) == DialogResult.Cancel)
+                    else if (CustomMessageBox.Show("You seem connected to " + vehicleName + " Wifi but it didn't answer our request. Do you want to try again?", vehicleName, MessageBoxButtons.OKCancel) == (int)DialogResult.Cancel)
                     {
                         return false;
                     }
@@ -1040,7 +1031,7 @@ namespace MissionPlanner.Utilities
 
                     while (!response.Contains("connected to 192.168.42.1:9050"))
                     {
-                        if (CustomMessageBox.Show("Couldn't contact " + vehicleName + ". Press the Power button " + ntimes + " times. Do you want to try to connect again?", vehicleName, MessageBoxButtons.OKCancel) == DialogResult.Cancel)
+                        if (CustomMessageBox.Show("Couldn't contact " + vehicleName + ". Press the Power button " + ntimes + " times. Do you want to try to connect again?", vehicleName, MessageBoxButtons.OKCancel) == (int)DialogResult.Cancel)
                         {
                             return false;
                         }
@@ -1231,7 +1222,7 @@ namespace MissionPlanner.Utilities
             {
                 AdbClient.Instance.KillAdb();
             }
-
+            
             return true;
         }
 
@@ -1289,7 +1280,8 @@ namespace MissionPlanner.Utilities
         public bool UploadFlash(string comport, string filename, BoardDetect.boards board)
         {
             if (board == BoardDetect.boards.px4 || board == BoardDetect.boards.px4v2 ||
-                board == BoardDetect.boards.px4v3 || board == BoardDetect.boards.px4v4)
+                board == BoardDetect.boards.px4v3 || board == BoardDetect.boards.px4v4 ||
+                board == BoardDetect.boards.px4v4pro)
             {
                 try
                 {
@@ -1304,7 +1296,8 @@ namespace MissionPlanner.Utilities
 
             if (board == BoardDetect.boards.vrbrainv40 || board == BoardDetect.boards.vrbrainv45 ||
                 board == BoardDetect.boards.vrbrainv50 || board == BoardDetect.boards.vrbrainv51 ||
-                board == BoardDetect.boards.vrbrainv52 || board == BoardDetect.boards.vrcorev10 ||
+                board == BoardDetect.boards.vrbrainv52 || board == BoardDetect.boards.vrbrainv54 ||
+                board == BoardDetect.boards.vrcorev10 ||
                 board == BoardDetect.boards.vrubrainv51 || board == BoardDetect.boards.vrubrainv52)
             {
                 return UploadVRBRAIN(filename, board);

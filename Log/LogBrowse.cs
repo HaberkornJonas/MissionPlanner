@@ -18,6 +18,7 @@ using MissionPlanner.Controls;
 using GMap.NET;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
+using MissionPlanner.ArduPilot;
 using MissionPlanner.Utilities;
 
 namespace MissionPlanner.Log
@@ -238,7 +239,11 @@ namespace MissionPlanner.Log
             new displaylist()
             {
                 Name = "Power Issues",
-                items = new displayitem[] {new displayitem() {type = "CURR", field = "Vcc"}}
+                items = new displayitem[]
+                {
+                    new displayitem() {type = "CURR", field = "Vcc"},
+                    new displayitem() {type = "POWR", field = "Vcc"}
+                }
             },
             new displaylist()
             {
@@ -880,11 +885,11 @@ namespace MissionPlanner.Log
                 {
                     reader.Read();
                     reader.ReadStartElement("LOGFORMAT");
-                    if (MainV2.comPort.MAV.cs.firmware == MainV2.Firmwares.ArduPlane)
+                    if (MainV2.comPort.MAV.cs.firmware == Firmwares.ArduPlane)
                     {
                         reader.ReadToFollowing("APM");
                     }
-                    else if (MainV2.comPort.MAV.cs.firmware == MainV2.Firmwares.ArduRover)
+                    else if (MainV2.comPort.MAV.cs.firmware == Firmwares.ArduRover)
                     {
                         reader.ReadToFollowing("APRover");
                     }
@@ -1209,7 +1214,12 @@ namespace MissionPlanner.Log
             else
             {
                 var list1 = DFLogScript.ProcessExpression(ref dflog, ref logdata, type);
-                GraphItem_AddCurve(list1, type, fieldname, left);
+                var newlist = new PointPairList();
+                list1.ForEach(a =>
+                {
+                    newlist.Add(new PointPair(a.Item1, a.Item2));
+                });
+                GraphItem_AddCurve(newlist, type, fieldname, left);
             }
         }
 
@@ -1335,6 +1345,21 @@ namespace MissionPlanner.Log
                 return;
             }
 
+            var ans = logdata.GetUnit(type, header);
+            string unit = ans.Item1;
+            double multiplier = ans.Item2;
+
+            if (unit != "")
+                header += " (" + unit + ")";
+
+            if (multiplier != 0 && multiplier != 1)
+            {
+                for (var i = 0; i < list1.Count; i++)
+                {
+                    list1[i].Y *= multiplier;
+                }
+            }
+
             LineItem myCurve;
 
             myCurve = zg1.GraphPane.AddCurve(type + "." + header, list1,
@@ -1438,8 +1463,6 @@ namespace MissionPlanner.Log
         void DrawModes()
         {
             bool top = false;
-            double a = 0;
-            int count = 0;
 
             zg1.GraphPane.GraphObjList.Clear();
 
@@ -1456,7 +1479,7 @@ namespace MissionPlanner.Log
 
             foreach (var item in logdata.GetEnumeratorType("MODE"))
             {
-                a = item.lineno;
+                double a = item.lineno;
 
                 if (item.msgtype == "MODE")
                 {
@@ -2330,6 +2353,8 @@ namespace MissionPlanner.Log
                 }
             }
 
+            opt.Dispose();
+
             zg1.Invalidate();
         }
 
@@ -2652,8 +2677,9 @@ namespace MissionPlanner.Log
         }
 
 
-        private void myGMAP1_OnRouteClick(GMapRoute item, MouseEventArgs e)
+        private void myGMAP1_OnRouteClick(GMapRoute item, object ei)
         {
+            var e = ei as MouseEventArgs;
             if ((item.Name != null) && (item.Name.StartsWith("route_")))
             {
                 LogRouteInfo lri = item.Tag as LogRouteInfo;

@@ -170,26 +170,33 @@ namespace AltitudeAngelWings.Service
             if (!IsSignedIn)
                 return;
 
-            RectLatLng area = map.GetViewArea();
-            await _messagesService.AddMessageAsync($"Map area {area.Top}, {area.Bottom}, {area.Left}, {area.Right}");
+            try
+            {
+                RectLatLng area = map.GetViewArea();
+                await _messagesService.AddMessageAsync($"Map area {area.Top}, {area.Bottom}, {area.Left}, {area.Right}");
 
-            AAFeatureCollection mapData = await _aaClient.GetMapData(area);
+                AAFeatureCollection mapData = await _aaClient.GetMapData(area);
 
-            // build the filter list
-            mapData.GetFilters();
+                // build the filter list
+                mapData.GetFilters();
 
-            // this ensures the user sees the results before its saved
-            _missionPlanner.SaveSetting("AAWings.Filters", JsonConvert.SerializeObject(FilteredOut));
+                // this ensures the user sees the results before its saved
+                _missionPlanner.SaveSetting("AAWings.Filters", JsonConvert.SerializeObject(FilteredOut));
 
-            await _messagesService.AddMessageAsync($"Map area Loaded {area.Top}, {area.Bottom}, {area.Left}, {area.Right}");
+                await _messagesService.AddMessageAsync($"Map area Loaded {area.Top}, {area.Bottom}, {area.Left}, {area.Right}");
 
-            // add all items to cache
-            mapData.Features.ForEach(feature => cache[feature.Id] = feature);
+                // add all items to cache
+                mapData.Features.ForEach(feature => cache[feature.Id] = feature);
 
-            // Only get the features that are enabled by default, and have not been filtered out
-            IEnumerable<Feature> features = mapData.Features.Where(feature => feature.IsEnabledByDefault() && feature.IsFilterOutItem(FilteredOut)).ToList();
+                // Only get the features that are enabled by default, and have not been filtered out
+                IEnumerable<Feature> features = mapData.Features.Where(feature => feature.IsEnabledByDefault() && feature.IsFilterOutItem(FilteredOut)).ToList();
 
-            ProcessFeatures(map, features);
+                ProcessFeatures(map, features);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         static Dictionary<string, Feature> cache = new Dictionary<string, Feature>();
@@ -251,8 +258,8 @@ namespace AltitudeAngelWings.Service
                                 for (int i = 0; i <= 360; i+=10)
                                 {
                                     coordinates.Add(
-                                        newpos(new PointLatLng(((GeographicPosition) pnt.Coordinates).Latitude,
-                                            ((GeographicPosition) pnt.Coordinates).Longitude), i, rad));
+                                        newpos(new PointLatLng(((Position) pnt.Coordinates).Latitude,
+                                            ((Position) pnt.Coordinates).Longitude), i, rad));
                                 }
                             }
 
@@ -269,7 +276,7 @@ namespace AltitudeAngelWings.Service
                         if (!overlay.LineExists(feature.Id))
                         {
                             var line = (LineString) feature.Geometry;
-                            List<PointLatLng> coordinates = line.Coordinates.OfType<GeographicPosition>()
+                            List<PointLatLng> coordinates = line.Coordinates.OfType<Position>()
                                 .Select(c => new PointLatLng(c.Latitude, c.Longitude))
                                 .ToList();
                             overlay.AddLine(feature.Id, coordinates, new ColorInfo {StrokeColor = 0xFFFF0000}, feature);
@@ -285,7 +292,7 @@ namespace AltitudeAngelWings.Service
                         {
                             var poly = (Polygon) feature.Geometry;
                             List<PointLatLng> coordinates =
-                                poly.Coordinates[0].Coordinates.OfType<GeographicPosition>()
+                                poly.Coordinates[0].Coordinates.OfType<Position>()
                                     .Select(c => new PointLatLng(c.Latitude, c.Longitude))
                                     .ToList();
 
@@ -301,7 +308,7 @@ namespace AltitudeAngelWings.Service
                             foreach (var poly in ((MultiPolygon) feature.Geometry).Coordinates)
                             {
                                 List<PointLatLng> coordinates =
-                                    poly.Coordinates[0].Coordinates.OfType<GeographicPosition>()
+                                    poly.Coordinates[0].Coordinates.OfType<Position>()
                                         .Select(c => new PointLatLng(c.Latitude, c.Longitude))
                                         .ToList();
 
