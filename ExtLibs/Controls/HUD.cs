@@ -102,6 +102,14 @@ namespace MissionPlanner.Controls
         [System.ComponentModel.Browsable(true), DefaultValue(true)]
         public bool displayrollpitch { get; set; }
 
+
+        //added for the Thesis
+        [System.ComponentModel.Browsable(true), DefaultValue(true)]
+        public bool displaymodule { get; set; }
+        [System.ComponentModel.Browsable(true), DefaultValue(0)]
+        public int module { get; set; }
+
+
         [System.ComponentModel.Browsable(true), DefaultValue(true)]
         public bool displaygps { get; set; }
 
@@ -2507,6 +2515,34 @@ namespace MissionPlanner.Controls
                     else
                     {
                         drawstring(text, font, fontsize + 2, _whiteBrush, fontsize,
+                            this.Height - 30 - fontoffset);
+                    }
+                }
+
+                //added for the Thesis
+                //TODO : mettre case cochable dans options pour afficher ces données (ce qui modifie displaymodule)
+                //TODO : créer une classe pour les modules
+                if (displaymodule || true)
+                {
+                    if (module > 0)
+                    {
+                        string module1 = $"Module {module}";
+                        SolidBrush col = _whiteBrush;
+                        drawstring(module1, font, fontsize + 2, col, 13 * fontsize,
+                            this.Height - 30 - fontoffset);
+                    }
+                    else if (module == 0)
+                    {
+                        string module1 = $"No Module";
+                        SolidBrush col = (SolidBrush)Brushes.Orange;
+                        drawstring(module1, font, fontsize + 2, col, 13 * fontsize,
+                            this.Height - 30 - fontoffset);
+                    }
+                    else
+                    {
+                        string module1 = $"Error Module";
+                        SolidBrush col = (SolidBrush)Brushes.Red;
+                        drawstring(module1, font, fontsize + 2, col, 13 * fontsize,
                             this.Height - 30 - fontoffset);
                     }
                 }
