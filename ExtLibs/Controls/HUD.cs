@@ -939,6 +939,10 @@ namespace MissionPlanner.Controls
         public event EventHandler ekfclick;
         public event EventHandler vibeclick;
 
+        //added for the Thesis
+        public event EventHandler moduleclick;
+        Rectangle modulehitzone = new Rectangle();
+
         Rectangle ekfhitzone = new Rectangle();
         Rectangle vibehitzone = new Rectangle();
 
@@ -957,6 +961,14 @@ namespace MissionPlanner.Controls
                 if (vibeclick != null)
                     vibeclick(this, null);
             }
+
+            //added for the Thesis
+            if (modulehitzone.IntersectsWith(new Rectangle(e.X, e.Y, 5, 5)))
+            {
+                if (moduleclick != null)
+                    moduleclick(this, null);
+            }
+
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -968,6 +980,11 @@ namespace MissionPlanner.Controls
                 Cursor.Current = Cursors.Hand;
             }
             else if (vibehitzone.IntersectsWith(new Rectangle(e.X, e.Y, 5, 5)))
+            {
+                Cursor.Current = Cursors.Hand;
+            }
+            //added for the Thesis
+            else if (modulehitzone.IntersectsWith(new Rectangle(e.X, e.Y, 5, 5)))
             {
                 Cursor.Current = Cursors.Hand;
             }
@@ -2520,30 +2537,29 @@ namespace MissionPlanner.Controls
                 }
 
                 //added for the Thesis
-                //TODO : mettre case cochable dans options pour afficher ces données (ce qui modifie displaymodule)
                 //TODO : créer une classe pour les modules
                 if (displaymodule || true)
                 {
+                    modulehitzone = new Rectangle(fontsize*2, this.Height - fontsize * 2, fontsize*8,
+                        fontsize * 3);
+
                     if (module > 0)
                     {
                         string module1 = $"Module {module}";
                         SolidBrush col = _whiteBrush;
-                        drawstring(module1, font, fontsize + 2, col, 13 * fontsize,
-                            this.Height - 30 - fontoffset);
+                        drawstring(module1, font, fontsize + 2, col, modulehitzone.X,modulehitzone.Y);
                     }
                     else if (module == 0)
                     {
                         string module1 = $"No Module";
                         SolidBrush col = (SolidBrush)Brushes.Orange;
-                        drawstring(module1, font, fontsize + 2, col, 13 * fontsize,
-                            this.Height - 30 - fontoffset);
+                        drawstring(module1, font, fontsize + 2, col, modulehitzone.X, modulehitzone.Y);
                     }
                     else
                     {
                         string module1 = $"Error Module";
                         SolidBrush col = (SolidBrush)Brushes.Red;
-                        drawstring(module1, font, fontsize + 2, col, 13 * fontsize,
-                            this.Height - 30 - fontoffset);
+                        drawstring(module1, font, fontsize + 2, col, modulehitzone.X, modulehitzone.Y);
                     }
                 }
 

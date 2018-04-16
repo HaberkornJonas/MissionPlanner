@@ -4188,6 +4188,14 @@ namespace MissionPlanner.GCSViews
             frm.TopMost = true;
             frm.Show();
         }
+		
+		//added for the Thesis
+		private void hud1_moduleclick(object sender, EventArgs e)
+        {
+            ModuleStatus frm = new ModuleStatus();
+            frm.TopMost = true;
+            frm.Show();
+        }
 
         private void hud1_vibeclick(object sender, EventArgs e)
         {
