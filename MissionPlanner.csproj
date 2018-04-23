@@ -306,6 +306,7 @@
     <Compile Include="Controls\LogAnalyzer.cs"> <SubType>Control</SubType> </Compile>
 	<Compile Include="Log\LogStrings.cs"> <SubType>Control</SubType> </Compile>
 	<Compile Include="Log\LogStrings.Designer.cs"><DependentUpon>LogStrings.cs</DependentUpon> </Compile>
+	<EmbeddedResource Include="Controls\ModuleStatus.resx" />
 	<EmbeddedResource Include="Controls\PropagationSettings.resx">
 	  <DependentUpon>PropagationSettings.cs</DependentUpon>
 	</EmbeddedResource>
