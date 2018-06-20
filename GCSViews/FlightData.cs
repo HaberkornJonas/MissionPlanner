@@ -187,6 +187,9 @@ namespace MissionPlanner.GCSViews
             myhud = hud1;
             MainHcopy = MainH;
 
+            //Added for the Thesis
+            MAVLinkInterface.ThesisMessage += myhud.ThesisMessageUpdate;
+
             mymap.Paint += mymap_Paint;
 
             // populate the unmodified base list

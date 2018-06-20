@@ -128,6 +128,13 @@ namespace MissionPlanner.GCSViews
                 data = data.TrimEnd('\r'); // else added \n all by itself
                 data = data.Replace("\0", "");
                 data = data.Replace((char) 0x1b + "[K", ""); // remove control code
+
+                //Thesis event listener to notify HUD
+                if(data.Contains("Thesis:"))
+                {
+                    TXT_terminal.AppendText("\nData from thesis implementation:\n");
+                }
+
                 TXT_terminal.AppendText(data);
 
                 if (data.Contains("\b"))

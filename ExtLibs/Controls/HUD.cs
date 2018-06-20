@@ -647,6 +647,9 @@ namespace MissionPlanner.Controls
         [System.ComponentModel.Browsable(true), System.ComponentModel.Category("Values")]
         public float ekfstatus { get; set; }
 
+        [System.ComponentModel.Browsable(true), System.ComponentModel.Category("String")]
+        public string modulstatus { get; set; }
+
         [System.ComponentModel.Browsable(true), System.ComponentModel.Category("Values")]
         public float AOA
         {
@@ -1655,6 +1658,19 @@ namespace MissionPlanner.Controls
         private readonly Pen _greenPen = new Pen(Color.Green, 2);
         private readonly Pen _redPen = new Pen(Color.Red, 2);
 
+        //Added for the Thesis
+        ///	<summary>
+        ///	ThesisMessageEvent Handler.
+        ///	Update the HUD with the infos comming from the message.
+        ///	</summary>
+        ///	<param name="source">Source object of the event</param>
+        ///	<param name="args">Arguments of the event</param>
+        public void ThesisMessageUpdate(object source, ThesisMessageEventArgs args)
+        {
+            log.Info("ThesisMessageEvent received !!!");
+        }
+
+
         void doPaint()
         {
             //Console.WriteLine("hud paint "+DateTime.Now.Millisecond);
@@ -2537,7 +2553,7 @@ namespace MissionPlanner.Controls
                 }
 
                 //added for the Thesis
-                //TODO : créer une classe pour les modules
+                //private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
                 if (displaymodule || true)
                 {
                     modulehitzone = new Rectangle(fontsize*2, this.Height - fontsize * 2, fontsize*8,

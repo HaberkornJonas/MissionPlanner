@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Comms\MissionPlanner.Comms.csproj" />
+    <ProjectReference Include="..\Controls\MissionPlanner.Controls.csproj" />
     <ProjectReference Include="..\GMap.NET.Core\GMap.NET.Core.csproj" />
     <ProjectReference Include="..\Maps\MissionPlanner.Maps.csproj" />
     <ProjectReference Include="..\Mavlink\MAVLink.csproj" />

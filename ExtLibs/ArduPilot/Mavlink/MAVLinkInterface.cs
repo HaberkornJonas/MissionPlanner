@@ -16,6 +16,8 @@ using MissionPlanner.Comms;
 using MissionPlanner.Mavlink;
 using MissionPlanner.Utilities;
 using Timer = System.Timers.Timer;
+//Added to the Thesis
+using MissionPlanner.Controls;
 
 namespace MissionPlanner
 {
@@ -3217,6 +3219,11 @@ Please check the following
 
         private double t7 = 1.0e7;
 
+        //Added for the Thesis
+        //Reference to Missionplanner.Controls has been added to MissionPlanner.ArduPilot
+        public delegate void ThesisMessageEventHandler(object sender, ThesisMessageEventArgs e);
+        public static event ThesisMessageEventHandler ThesisMessage;
+
         /// <summary>
         /// Serial Reader to read mavlink packets. POLL method
         /// </summary>
@@ -3304,6 +3311,13 @@ Please check the following
                                     plaintxtline = buildplaintxtline;
 
                                 log.Info(plaintxtline);
+
+                                //Added for the Thesis
+                                if(plaintxtline.Contains("Thesis:"))
+                                {
+                                    ThesisMessage?.Invoke(this, new ThesisMessageEventArgs(plaintxtline));
+                                }
+
                                 // reset for next line
                                 buildplaintxtline = "";
                             }

@@ -136,6 +136,7 @@
     <Compile Include="Sphere.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="ThesisMessageEventArgs.cs" />
     <Compile Include="ValuesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
