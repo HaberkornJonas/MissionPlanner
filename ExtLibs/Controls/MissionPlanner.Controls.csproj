@@ -86,6 +86,7 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="MainSwitcher.cs" />
+    <Compile Include="ModuleStatus.cs" />
     <Compile Include="MyButton.cs">
       <SubType>Component</SubType>
     </Compile>

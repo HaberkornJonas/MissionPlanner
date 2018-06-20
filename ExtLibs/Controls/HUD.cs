@@ -106,8 +106,6 @@ namespace MissionPlanner.Controls
         //added for the Thesis
         [System.ComponentModel.Browsable(true), DefaultValue(true)]
         public bool displaymodule { get; set; }
-        [System.ComponentModel.Browsable(true), DefaultValue(0)]
-        public int module { get; set; }
 
 
         [System.ComponentModel.Browsable(true), DefaultValue(true)]
@@ -1659,6 +1657,8 @@ namespace MissionPlanner.Controls
         private readonly Pen _redPen = new Pen(Color.Red, 2);
 
         //Added for the Thesis
+        private ModuleStatus CurentModuleStatus { get; set; } = new ModuleStatus(0, null);
+        private int NumberOfParams = 3;
         ///	<summary>
         ///	ThesisMessageEvent Handler.
         ///	Update the HUD with the infos comming from the message.
@@ -1667,9 +1667,28 @@ namespace MissionPlanner.Controls
         ///	<param name="args">Arguments of the event</param>
         public void ThesisMessageUpdate(object source, ThesisMessageEventArgs args)
         {
-            log.Info("ThesisMessageEvent received !!!");
+            if (args == null)
+                throw new ArgumentNullException();
+            string message = args.Message;
+            if (message.StartsWith("\nThesis:"))
+            {
+                String[] tmpData = message.Split('/');
+                if (tmpData.Length == 8 && tmpData[7].EndsWith(";"))
+                {
+                    int moduleNumber = Int32.Parse(tmpData[4].Split(':')[1]);
+                    double[] param = new double[NumberOfParams];
+                    for (int i = 5; i<(5+ NumberOfParams); i++)
+                    {
+                        param[i-5] = double.Parse(tmpData[i].Split(':')[1]);
+                    }
+                    CurentModuleStatus = new ModuleStatus(moduleNumber, param);
+                    return;
+                }
+            }
+            log.Error("Thesis Message could not be handled, received message : " + args.Message);
         }
 
+        
 
         void doPaint()
         {
@@ -2553,30 +2572,28 @@ namespace MissionPlanner.Controls
                 }
 
                 //added for the Thesis
-                //private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
                 if (displaymodule || true)
                 {
-                    modulehitzone = new Rectangle(fontsize*2, this.Height - fontsize * 2, fontsize*8,
+                    modulehitzone = new Rectangle(fontsize*2, this.Height - 30 - fontoffset, fontsize*8,
                         fontsize * 3);
-
-                    if (module > 0)
+                    string status;
+                    SolidBrush col;
+                    if (CurentModuleStatus.ModuleNumber > 0)
                     {
-                        string module1 = $"Module {module}";
-                        SolidBrush col = _whiteBrush;
-                        drawstring(module1, font, fontsize + 2, col, modulehitzone.X,modulehitzone.Y);
+                        status = $"Module {CurentModuleStatus.ModuleNumber}";
+                        col = _whiteBrush;
                     }
-                    else if (module == 0)
+                    else if (CurentModuleStatus.ModuleNumber == 0)
                     {
-                        string module1 = $"No Module";
-                        SolidBrush col = (SolidBrush)Brushes.Orange;
-                        drawstring(module1, font, fontsize + 2, col, modulehitzone.X, modulehitzone.Y);
+                        status = $"No Module";
+                        col = (SolidBrush)Brushes.Orange;
                     }
                     else
                     {
-                        string module1 = $"Error Module";
-                        SolidBrush col = (SolidBrush)Brushes.Red;
-                        drawstring(module1, font, fontsize + 2, col, modulehitzone.X, modulehitzone.Y);
+                        status = $"Error Module";
+                        col = (SolidBrush)Brushes.Red;
                     }
+                    drawstring(status, font, fontsize + 2, col, modulehitzone.X, modulehitzone.Y);
                 }
 
                 // gps

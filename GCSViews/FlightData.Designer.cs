@@ -370,7 +370,7 @@
             this.hud1.ekfclick += new System.EventHandler(this.hud1_ekfclick);
 			
 			//added for the Thesis
-			//this.hud1.moduleclick += new System.EventHandler(this.hud1_moduleclick);
+			this.hud1.moduleclick += new System.EventHandler(this.hud1_moduleclick);
 			
             this.hud1.vibeclick += new System.EventHandler(this.hud1_vibeclick);
             this.hud1.DoubleClick += new System.EventHandler(this.hud1_DoubleClick);
