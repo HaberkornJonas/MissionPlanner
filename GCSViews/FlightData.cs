@@ -4195,7 +4195,7 @@ namespace MissionPlanner.GCSViews
 		//added for the Thesis
 		private void hud1_moduleclick(object sender, EventArgs e)
         {
-            ModuleStatus frm = new ModuleStatus();
+            ModuleStatusForm frm = new ModuleStatusForm();
             frm.TopMost = true;
             frm.Show();
         }

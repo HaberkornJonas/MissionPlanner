@@ -1,6 +1,6 @@
 ﻿namespace MissionPlanner.Controls
 {
-    internal class ModuleStatus
+    public class ModuleStatus
     {
         public readonly int ModuleNumber;
         public readonly double[] Param;
