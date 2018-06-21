@@ -243,7 +243,6 @@
     <Compile Include="Controls\ModuleStatusForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Controls\ModuleStatusForm.Designer.cs" />
     <Compile Include="Controls\PropagationSettings.cs">
       <SubType>Control</SubType>
     </Compile>
@@ -307,6 +306,7 @@
     <Compile Include="Controls\LogAnalyzer.cs"> <SubType>Control</SubType> </Compile>
 	<Compile Include="Log\LogStrings.cs"> <SubType>Control</SubType> </Compile>
 	<Compile Include="Log\LogStrings.Designer.cs"><DependentUpon>LogStrings.cs</DependentUpon> </Compile>
+	<EmbeddedResource Include="Controls\ModuleStatusForm.resx" />
 	<EmbeddedResource Include="Controls\PropagationSettings.resx">
 	  <DependentUpon>PropagationSettings.cs</DependentUpon>
 	</EmbeddedResource>
