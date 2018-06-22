@@ -1657,8 +1657,8 @@ namespace MissionPlanner.Controls
         private readonly Pen _redPen = new Pen(Color.Red, 2);
 
         //Added for the Thesis
-        private ModuleStatus CurentModuleStatus { get; set; } = new ModuleStatus(0, null);
-        private int NumberOfParams = 3;
+        public static ModuleStatus CurentModuleStatus { get; set; } = new ModuleStatus(0, null);
+        public static int[] NumberOfParams = { 0, 3, 3, 3 };
         ///	<summary>
         ///	ThesisMessageEvent Handler.
         ///	Update the HUD with the infos comming from the message.
@@ -1673,16 +1673,22 @@ namespace MissionPlanner.Controls
             if (message.StartsWith("\nThesis:"))
             {
                 String[] tmpData = message.Split('/');
-                if (tmpData.Length == 8 && tmpData[7].EndsWith(";"))
+                if (tmpData[tmpData.Length-1].EndsWith(";"))
                 {
                     int moduleNumber = Int32.Parse(tmpData[4].Split(':')[1]);
-                    double[] param = new double[NumberOfParams];
-                    for (int i = 5; i<(5+ NumberOfParams); i++)
+                    List<double> param = new List<double>();
+                    try
                     {
-                        param[i-5] = double.Parse(tmpData[i].Split(':')[1]);
+                        for (int i = 5; i < (5 + NumberOfParams[moduleNumber]); i++)
+                        {
+                            param.Add(double.Parse(tmpData[i].Split(':')[1]));
+                        }
+                        CurentModuleStatus = new ModuleStatus(moduleNumber, param.ToArray());
+                        return;
+                    }catch(Exception e)
+                    {
+                        log.Error(e.Message);
                     }
-                    CurentModuleStatus = new ModuleStatus(moduleNumber, param);
-                    return;
                 }
             }
             log.Error("Thesis Message could not be handled, received message : " + args.Message);

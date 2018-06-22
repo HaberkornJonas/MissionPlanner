@@ -28,9 +28,9 @@ namespace MissionPlanner.Controls
         private void timer1_Tick(object sender, EventArgs e)
         {
             this.SuspendLayout();
-            ModuleStatus tmp = new ModuleStatus(3, new double[]{ 1.2, 1.8, 5 });
+            ModuleStatus modulestatus = HUD.CurentModuleStatus;
 
-            ModuleNumber.Text = "Module : "+tmp.ModuleNumber;
+            ModuleNumber.Text = "Module : " + modulestatus.ModuleNumber;
             if (Param != null)
             {
                 foreach (var lab in Param)
@@ -41,19 +41,21 @@ namespace MissionPlanner.Controls
 
             Param = new List<Label>();
             int i = 0;
-            foreach (var param in tmp.Param)
+            if (modulestatus.Param != null)
             {
-                Param.Add(new Label());
-                Param[i].AutoSize = true;
-                Param[i].Location = new System.Drawing.Point(71, 25+25*(i+1));
-                Param[i].Name = $"Param {i+1}";
-                Param[i].Size = new System.Drawing.Size(66, 17);
-                Param[i].TabIndex = 0;
-                Param[i].Text = $"Param {i+1} : {param}";
-                this.Controls.Add(Param[i]);
+                foreach (var param in modulestatus.Param)
+                {
+                    Param.Add(new Label());
+                    Param[i].AutoSize = true;
+                    Param[i].Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
+                    Param[i].Name = $"Param {i + 1}";
+                    Param[i].Size = new System.Drawing.Size(66, 17);
+                    Param[i].TabIndex = 0;
+                    Param[i].Text = $"Param {i + 1} : {param}";
+                    this.Controls.Add(Param[i]);
 
-
-                i++;
+                    i++;
+                }
             }
 
             // restore colours
@@ -73,9 +75,10 @@ namespace MissionPlanner.Controls
             // ModuleNumber
             // 
             this.ModuleNumber.AutoSize = true;
+            this.ModuleNumber.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ModuleNumber.Location = new System.Drawing.Point(71, 25);
             this.ModuleNumber.Name = "ModuleNumber";
-            this.ModuleNumber.Size = new System.Drawing.Size(66, 17);
+            this.ModuleNumber.Size = new System.Drawing.Size(87, 20);
             this.ModuleNumber.TabIndex = 0;
             this.ModuleNumber.Text = "Module : ";
             // 
