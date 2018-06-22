@@ -1657,8 +1657,7 @@ namespace MissionPlanner.Controls
         private readonly Pen _redPen = new Pen(Color.Red, 2);
 
         //Added for the Thesis
-        public static ModuleStatus CurentModuleStatus { get; set; } = new ModuleStatus(0, null);
-        public static int[] NumberOfParams = { 0, 3, 3, 3 };
+        public static ModuleStatus CurentModuleStatus { get; set; } = new ModuleStatus(-1, null);
         ///	<summary>
         ///	ThesisMessageEvent Handler.
         ///	Update the HUD with the infos comming from the message.
@@ -1679,7 +1678,7 @@ namespace MissionPlanner.Controls
                     List<double> param = new List<double>();
                     try
                     {
-                        for (int i = 5; i < (5 + NumberOfParams[moduleNumber]); i++)
+                        for (int i = 5; i < (5 + ModuleStatus.GetNumberParameter(moduleNumber)); i++)
                         {
                             param.Add(double.Parse(tmpData[i].Split(':')[1]));
                         }
@@ -2596,8 +2595,9 @@ namespace MissionPlanner.Controls
                     }
                     else
                     {
-                        status = $"Error Module";
+                        status = $"APM not connected";
                         col = (SolidBrush)Brushes.Red;
+                        drawstring(" Module Error or ", font, fontsize + 2, col, modulehitzone.X, modulehitzone.Y- fontsize - 6);
                     }
                     drawstring(status, font, fontsize + 2, col, modulehitzone.X, modulehitzone.Y);
                 }

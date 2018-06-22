@@ -12,7 +12,6 @@ namespace MissionPlanner.Controls
 {
     public partial class ModuleStatusForm: Form
     {
-        private int NumberParam = 3;
         private Timer timer1;
         private IContainer components;
         private Label ModuleNumber;
@@ -30,7 +29,7 @@ namespace MissionPlanner.Controls
             this.SuspendLayout();
             ModuleStatus modulestatus = HUD.CurentModuleStatus;
 
-            ModuleNumber.Text = "Module : " + modulestatus.ModuleNumber;
+            ModuleNumber.Text = ModuleStatus.GetModuleName(modulestatus.ModuleNumber);
             if (Param != null)
             {
                 foreach (var lab in Param)
@@ -47,11 +46,11 @@ namespace MissionPlanner.Controls
                 {
                     Param.Add(new Label());
                     Param[i].AutoSize = true;
-                    Param[i].Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
-                    Param[i].Name = $"Param {i + 1}";
+                    Param[i].Location = new System.Drawing.Point(71, 25 + 25 * (i+1));
+                    Param[i].Name = ModuleStatus.GetParameterName(modulestatus.ModuleNumber, i);
                     Param[i].Size = new System.Drawing.Size(66, 17);
                     Param[i].TabIndex = 0;
-                    Param[i].Text = $"Param {i + 1} : {param}";
+                    Param[i].Text = $"{ModuleStatus.GetParameterName(modulestatus.ModuleNumber, i)} : {param}";
                     this.Controls.Add(Param[i]);
 
                     i++;
@@ -68,6 +67,7 @@ namespace MissionPlanner.Controls
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ModuleStatusForm));
             this.ModuleNumber = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
@@ -93,7 +93,9 @@ namespace MissionPlanner.Controls
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(282, 253);
             this.Controls.Add(this.ModuleNumber);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ModuleStatusForm";
+            this.Text = "Module status";
             this.ResumeLayout(false);
             this.PerformLayout();
 
