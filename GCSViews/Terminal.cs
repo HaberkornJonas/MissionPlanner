@@ -129,7 +129,7 @@ namespace MissionPlanner.GCSViews
                 data = data.Replace("\0", "");
                 data = data.Replace((char) 0x1b + "[K", ""); // remove control code
 
-                //Thesis event listener to notify HUD
+                //Added for the Thesis
                 if(data.Contains("Thesis:"))
                 {
                     TXT_terminal.AppendText("\nData from thesis implementation:\n");

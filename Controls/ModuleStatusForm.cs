@@ -15,7 +15,11 @@ namespace MissionPlanner.Controls
         private Timer timer1;
         private IContainer components;
         private Label ModuleNumber;
+        private Label MessageNumber;
         private List<Label> Param;
+        private List<Label> Position;
+        private int CounterNoNewMessage = 0;
+        private int LastMessageNumber = -1;
 
         public ModuleStatusForm()
         {
@@ -52,16 +56,38 @@ namespace MissionPlanner.Controls
                     Param[i].TabIndex = 0;
                     Param[i].Text = $"{ModuleStatus.GetParameterName(modulestatus.ModuleNumber, i)} : {param}";
                     this.Controls.Add(Param[i]);
-
                     i++;
                 }
             }
+            i++;
+            for (int j = 0; j < ModuleStatus.PositionFieldsName.Length; j++)
+            {
+                Position[j].Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
+                Position[j].Text = $"{((modulestatus.ModuleNumber == -1) ? ($"Last {ModuleStatus.PositionFieldsName[j].ToLower()}"): ModuleStatus.PositionFieldsName[j])} : {modulestatus.PositionFieldsValue[j]}";
+                i++;
+            }
+            MessageNumber.Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
+            MessageNumber.Text = $"Message emitted number :  {modulestatus.MessageNumber}";
 
             // restore colours
             Utilities.ThemeManager.ApplyThemeTo(this);
             this.ResumeLayout(false);
             this.PerformLayout();
 
+            if (modulestatus.MessageNumber == LastMessageNumber)
+            {
+                CounterNoNewMessage++;
+                if(CounterNoNewMessage>20) //after 2s with no new messages, set error or disconnected but keep position values
+                {
+                    modulestatus.ModuleNumber = -1;
+                    modulestatus.Param = null;
+                }
+            }
+            else
+            {
+                CounterNoNewMessage = 0;
+                LastMessageNumber = modulestatus.MessageNumber;
+            }
         }
 
         private void InitializeComponent()
@@ -71,12 +97,13 @@ namespace MissionPlanner.Controls
             this.ModuleNumber = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
+            int i = 0;
             // 
             // ModuleNumber
             // 
             this.ModuleNumber.AutoSize = true;
             this.ModuleNumber.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ModuleNumber.Location = new System.Drawing.Point(71, 25);
+            this.ModuleNumber.Location = new System.Drawing.Point(60, 25);
             this.ModuleNumber.Name = "ModuleNumber";
             this.ModuleNumber.Size = new System.Drawing.Size(87, 20);
             this.ModuleNumber.TabIndex = 0;
@@ -85,7 +112,7 @@ namespace MissionPlanner.Controls
             // timer1
             // 
             this.timer1.Enabled = true;
-            this.timer1.Interval = 300;
+            this.timer1.Interval = 150;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // ModuleStatusForm
@@ -98,7 +125,33 @@ namespace MissionPlanner.Controls
             this.Text = "Module status";
             this.ResumeLayout(false);
             this.PerformLayout();
-
+            //
+            // Position
+            //
+            Position = new List<Label>();
+            for(; i<ModuleStatus.PositionFieldsName.Length; i++)
+            {
+                Position.Add(new Label());
+                Position[i].AutoSize = true;
+                Position[i].Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
+                Position[i].Name = ModuleStatus.PositionFieldsName[i];
+                Position[i].Size = new System.Drawing.Size(66, 17);
+                Position[i].TabIndex = 0;
+                Position[i].Text = $"{ModuleStatus.PositionFieldsName[i]} : ";
+                this.Controls.Add(Position[i]);
+            }
+            //
+            // Message number
+            //
+            MessageNumber = new Label();
+            MessageNumber.AutoSize = true;
+            MessageNumber.Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
+            MessageNumber.Name = "Message number";
+            MessageNumber.Size = new System.Drawing.Size(66, 17);
+            MessageNumber.TabIndex = 0;
+            MessageNumber.Text = "Message emitted number : ";
+            this.Controls.Add(MessageNumber);
+            i++;
         }
     }
 }

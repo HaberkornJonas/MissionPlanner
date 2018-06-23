@@ -1657,7 +1657,7 @@ namespace MissionPlanner.Controls
         private readonly Pen _redPen = new Pen(Color.Red, 2);
 
         //Added for the Thesis
-        public static ModuleStatus CurentModuleStatus { get; set; } = new ModuleStatus(-1, null);
+        public static ModuleStatus CurentModuleStatus { get; set; } = new ModuleStatus(-1,"","","", null,-1);
         ///	<summary>
         ///	ThesisMessageEvent Handler.
         ///	Update the HUD with the infos comming from the message.
@@ -1674,6 +1674,10 @@ namespace MissionPlanner.Controls
                 String[] tmpData = message.Split('/');
                 if (tmpData[tmpData.Length-1].EndsWith(";"))
                 {
+                    int messageNumber = Int32.Parse(tmpData[0].Split(':')[1]);
+                    string longitude = tmpData[1].Split(':')[1];
+                    string latitude = tmpData[2].Split(':')[1];
+                    string altitude = tmpData[3].Split(':')[1];
                     int moduleNumber = Int32.Parse(tmpData[4].Split(':')[1]);
                     List<double> param = new List<double>();
                     try
@@ -1682,7 +1686,7 @@ namespace MissionPlanner.Controls
                         {
                             param.Add(double.Parse(tmpData[i].Split(':')[1]));
                         }
-                        CurentModuleStatus = new ModuleStatus(moduleNumber, param.ToArray());
+                        CurentModuleStatus = new ModuleStatus(moduleNumber, longitude, latitude, altitude, param.ToArray(), messageNumber);
                         return;
                     }catch(Exception e)
                     {
@@ -2585,7 +2589,7 @@ namespace MissionPlanner.Controls
                     SolidBrush col;
                     if (CurentModuleStatus.ModuleNumber > 0)
                     {
-                        status = $"Module {CurentModuleStatus.ModuleNumber}";
+                        status = ModuleStatus.GetModuleName(CurentModuleStatus.ModuleNumber);
                         col = _whiteBrush;
                     }
                     else if (CurentModuleStatus.ModuleNumber == 0)

@@ -18,11 +18,22 @@
             new string[]{ "Temperature", "Humidity", "Pressure"},
             new string[]{ "Spot status" }
         };
-        public readonly int ModuleNumber;
-        public readonly double[] Param;
-        public ModuleStatus(int moduleNumber, double[] param)
+
+        public int ModuleNumber;
+        public double[] Param;
+        public readonly int MessageNumber;
+
+        // These 3 parameter are of type string to avoid convertion lost
+        public readonly string[] PositionFieldsValue;
+        public static string[] PositionFieldsName = { "Latitude", "Longitude", "Altitude" };
+
+
+
+        public ModuleStatus(int moduleNumber, string longitude, string latitude, string altitude, double[] param, int messageNumber = -1)
         {
             ModuleNumber = moduleNumber;
+            PositionFieldsValue = new string[]{longitude, latitude, altitude};
+            MessageNumber = messageNumber;
             Param = param;
         }
 
