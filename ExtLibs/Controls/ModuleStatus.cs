@@ -15,12 +15,12 @@
             new string[]{ },
             new string[]{ "param 1", "param 2", "param 3"},
             new string[]{ "Pump status"},
-            new string[]{ "Temperature", "Humidity", "Pressure"},
+            new string[]{ "Temperature", "Humidity", "Luminosity"},
             new string[]{ "Spot status" }
         };
 
         public int ModuleNumber;
-        public double[] Param;
+        public string[] Param;
         public readonly int MessageNumber;
 
         // These 3 parameter are of type string to avoid convertion lost
@@ -29,7 +29,7 @@
 
 
 
-        public ModuleStatus(int moduleNumber, string longitude, string latitude, string altitude, double[] param, int messageNumber = -1)
+        public ModuleStatus(int moduleNumber, string longitude, string latitude, string altitude, string[] param, int messageNumber = -1)
         {
             ModuleNumber = moduleNumber;
             PositionFieldsValue = new string[]{longitude, latitude, altitude};

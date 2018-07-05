@@ -77,7 +77,7 @@ namespace MissionPlanner.Controls
             if (modulestatus.MessageNumber == LastMessageNumber)
             {
                 CounterNoNewMessage++;
-                if(CounterNoNewMessage>20) //after 2s with no new messages, set error or disconnected but keep position values
+                if(CounterNoNewMessage>10) //after 1s with no new messages, set error or disconnected but keep position values
                 {
                     modulestatus.ModuleNumber = -1;
                     modulestatus.Param = null;

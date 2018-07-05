@@ -1679,12 +1679,12 @@ namespace MissionPlanner.Controls
                     string latitude = tmpData[2].Split(':')[1];
                     string altitude = tmpData[3].Split(':')[1];
                     int moduleNumber = Int32.Parse(tmpData[4].Split(':')[1]);
-                    List<double> param = new List<double>();
+                    List<string> param = new List<string>();
                     try
                     {
                         for (int i = 5; i < (5 + ModuleStatus.GetNumberParameter(moduleNumber)); i++)
                         {
-                            param.Add(double.Parse(tmpData[i].Split(':')[1]));
+                            param.Add(tmpData[i].Split(':')[1]);
                         }
                         CurentModuleStatus = new ModuleStatus(moduleNumber, longitude, latitude, altitude, param.ToArray(), messageNumber);
                         return;
