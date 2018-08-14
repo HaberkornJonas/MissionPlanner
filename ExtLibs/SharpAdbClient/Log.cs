@@ -178,14 +178,10 @@ namespace SharpAdbClient
                 if (LogOutput != null)
                 {
                     LogOutput.Write(logLevel, tag, formattedMessage);
-                    //Thesis
-                    LogOutput.Write(logLevel, tag, "WRITE LINE WITH LOGOUTPUT");
                 }
                 else
                 {
                     Write(logLevel, tag, formattedMessage);
-                    //Thesis
-                    Write(logLevel, tag, "WRITE WITHOUT LOGOUTPUT");
                 }
             }
         }

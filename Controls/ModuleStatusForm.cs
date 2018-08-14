@@ -15,11 +15,17 @@ namespace MissionPlanner.Controls
         private Timer timer1;
         private IContainer components;
         private Label ModuleNumber;
-        private Label MessageNumber;
-        private List<Label> Param;
+        private Label MessageNumberAPM;
+        private Label MessageNumberController;
+        private Label TimeElapsedSinceAPMStart;
+        private List<Label> Parameters;
         private List<Label> Position;
         private int CounterNoNewMessage = 0;
-        private int LastMessageNumber = -1;
+        private int LastMessageNumberAPM = -1;
+        private const int SIZE_X_WINDOW = 350; //282
+        private const int SIZE_Y_WINDOW = 330; //253
+        private const int TABULATION_TITLE = 30;
+        private const int TABULATION_DATA = TABULATION_TITLE + 11;
 
         public ModuleStatusForm()
         {
@@ -30,63 +36,71 @@ namespace MissionPlanner.Controls
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            this.SuspendLayout();
             ModuleStatus modulestatus = HUD.CurentModuleStatus;
+            if (modulestatus.MessageNumberAPM == -1)
+                return;
+            this.SuspendLayout();
 
             ModuleNumber.Text = ModuleStatus.GetModuleName(modulestatus.ModuleNumber);
-            if (Param != null)
+            if (Parameters != null)
             {
-                foreach (var lab in Param)
+                foreach (var lab in Parameters)
                 {
                     this.Controls.Remove(lab);
                 }
             }
 
-            Param = new List<Label>();
+            Parameters = new List<Label>();
             int i = 0;
-            if (modulestatus.Param != null)
+            if (modulestatus.Parameters != null)
             {
-                foreach (var param in modulestatus.Param)
+                foreach (var parameter in modulestatus.Parameters)
                 {
-                    Param.Add(new Label());
-                    Param[i].AutoSize = true;
-                    Param[i].Location = new System.Drawing.Point(71, 25 + 25 * (i+1));
-                    Param[i].Name = ModuleStatus.GetParameterName(modulestatus.ModuleNumber, i);
-                    Param[i].Size = new System.Drawing.Size(66, 17);
-                    Param[i].TabIndex = 0;
-                    Param[i].Text = $"{ModuleStatus.GetParameterName(modulestatus.ModuleNumber, i)} : {param}";
-                    this.Controls.Add(Param[i]);
+                    Parameters.Add(new Label());
+                    Parameters[i].AutoSize = true;
+                    Parameters[i].Location = new System.Drawing.Point(TABULATION_DATA, 25 + 25 * (i+1));
+                    Parameters[i].Name = ModuleStatus.GetParameterName(modulestatus.ModuleNumber, i);
+                    Parameters[i].Size = new Size(66, 17);
+                    Parameters[i].TabIndex = 0;
+                    Parameters[i].Text = $"{ModuleStatus.GetParameterName(modulestatus.ModuleNumber, i)} : {parameter}";
+                    this.Controls.Add(Parameters[i]);
                     i++;
                 }
             }
             i++;
             for (int j = 0; j < ModuleStatus.PositionFieldsName.Length; j++)
             {
-                Position[j].Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
+                Position[j].Location = new System.Drawing.Point(TABULATION_DATA, 25 + 25 * (i + 1));
                 Position[j].Text = $"{((modulestatus.ModuleNumber == -1) ? ($"Last {ModuleStatus.PositionFieldsName[j].ToLower()}"): ModuleStatus.PositionFieldsName[j])} : {modulestatus.PositionFieldsValue[j]}";
                 i++;
             }
-            MessageNumber.Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
-            MessageNumber.Text = $"Message emitted number :  {modulestatus.MessageNumber}";
+            MessageNumberAPM.Location = new System.Drawing.Point(TABULATION_DATA, 25 + 25 * (i + 1));
+            MessageNumberAPM.Text = $"{((modulestatus.MessageNumberAPM == -1) ? "APM - Last message emitted number" : "APM - Message emitted number")} : {modulestatus.MessageNumberAPM}";
+            i++;
+            MessageNumberController.Location = new System.Drawing.Point(TABULATION_DATA, 25 + 25 * (i + 1));
+            MessageNumberController.Text = $"{((modulestatus.MessageNumberController == -1) ? "Module - Last message emitted number" : "Module - Message emitted number")} : {modulestatus.MessageNumberController}";
+            i++;
+            TimeElapsedSinceAPMStart.Location = new System.Drawing.Point(TABULATION_DATA, 25 + 25 * (i + 1));
+            TimeElapsedSinceAPMStart.Text = $"Time elapsed since APM's start : {((int)(modulestatus.MillisecondsSinceAPMStart / 1000 / 60 / 60) % 24).ToString().PadLeft(2, '0')}:{((int)(modulestatus.MillisecondsSinceAPMStart / 1000 / 60) % 60).ToString().PadLeft(2, '0')}:{((int)(modulestatus.MillisecondsSinceAPMStart/1000)%60).ToString().PadLeft(2, '0')}s {(modulestatus.MillisecondsSinceAPMStart % 1000).ToString().PadLeft(3, '0')}ms";
 
             // restore colours
             Utilities.ThemeManager.ApplyThemeTo(this);
             this.ResumeLayout(false);
             this.PerformLayout();
 
-            if (modulestatus.MessageNumber == LastMessageNumber)
+            if (modulestatus.MessageNumberAPM == LastMessageNumberAPM)
             {
                 CounterNoNewMessage++;
-                if(CounterNoNewMessage>10) //after 1s with no new messages, set error or disconnected but keep position values
+                if(CounterNoNewMessage>27) //after 2.7s with no new messages, set error or disconnected but keep position values
                 {
                     modulestatus.ModuleNumber = -1;
-                    modulestatus.Param = null;
+                    modulestatus.Parameters = null;
                 }
             }
             else
             {
                 CounterNoNewMessage = 0;
-                LastMessageNumber = modulestatus.MessageNumber;
+                LastMessageNumberAPM = modulestatus.MessageNumberAPM;
             }
         }
 
@@ -103,7 +117,7 @@ namespace MissionPlanner.Controls
             // 
             this.ModuleNumber.AutoSize = true;
             this.ModuleNumber.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ModuleNumber.Location = new System.Drawing.Point(60, 25);
+            this.ModuleNumber.Location = new System.Drawing.Point(TABULATION_TITLE, 25);
             this.ModuleNumber.Name = "ModuleNumber";
             this.ModuleNumber.Size = new System.Drawing.Size(87, 20);
             this.ModuleNumber.TabIndex = 0;
@@ -118,7 +132,7 @@ namespace MissionPlanner.Controls
             // ModuleStatusForm
             // 
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(282, 253);
+            this.ClientSize = new System.Drawing.Size(SIZE_X_WINDOW, SIZE_Y_WINDOW);
             this.Controls.Add(this.ModuleNumber);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ModuleStatusForm";
@@ -133,7 +147,7 @@ namespace MissionPlanner.Controls
             {
                 Position.Add(new Label());
                 Position[i].AutoSize = true;
-                Position[i].Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
+                Position[i].Location = new System.Drawing.Point(TABULATION_DATA, 25 + 25 * (i + 1));
                 Position[i].Name = ModuleStatus.PositionFieldsName[i];
                 Position[i].Size = new System.Drawing.Size(66, 17);
                 Position[i].TabIndex = 0;
@@ -141,16 +155,40 @@ namespace MissionPlanner.Controls
                 this.Controls.Add(Position[i]);
             }
             //
-            // Message number
+            // Message number APM
             //
-            MessageNumber = new Label();
-            MessageNumber.AutoSize = true;
-            MessageNumber.Location = new System.Drawing.Point(71, 25 + 25 * (i + 1));
-            MessageNumber.Name = "Message number";
-            MessageNumber.Size = new System.Drawing.Size(66, 17);
-            MessageNumber.TabIndex = 0;
-            MessageNumber.Text = "Message emitted number : ";
-            this.Controls.Add(MessageNumber);
+            MessageNumberAPM = new Label();
+            MessageNumberAPM.AutoSize = true;
+            MessageNumberAPM.Location = new System.Drawing.Point(TABULATION_DATA, 25 + 25 * (i + 1));
+            MessageNumberAPM.Name = "APM - Message number";
+            MessageNumberAPM.Size = new System.Drawing.Size(66, 17);
+            MessageNumberAPM.TabIndex = 0;
+            MessageNumberAPM.Text = "APM - Message emitted number : ";
+            this.Controls.Add(MessageNumberAPM);
+            i++;
+            //
+            // Message number Module
+            //
+            MessageNumberController = new Label();
+            MessageNumberController.AutoSize = true;
+            MessageNumberController.Location = new System.Drawing.Point(TABULATION_DATA, 25 + 25 * (i + 1));
+            MessageNumberController.Name = "Module - Message number Module";
+            MessageNumberController.Size = new System.Drawing.Size(66, 17);
+            MessageNumberController.TabIndex = 0;
+            MessageNumberController.Text = "Module - Message emitted number : ";
+            this.Controls.Add(MessageNumberController);
+            i++;
+            //
+            // Milliseconds since APM start
+            //
+            TimeElapsedSinceAPMStart = new Label();
+            TimeElapsedSinceAPMStart.AutoSize = true;
+            TimeElapsedSinceAPMStart.Location = new System.Drawing.Point(TABULATION_DATA, 25 + 25 * (i + 1));
+            TimeElapsedSinceAPMStart.Name = "Time elapsed since APM's start";
+            TimeElapsedSinceAPMStart.Size = new System.Drawing.Size(66, 17);
+            TimeElapsedSinceAPMStart.TabIndex = 0;
+            TimeElapsedSinceAPMStart.Text = "Time elapsed since APM's start : ";
+            this.Controls.Add(TimeElapsedSinceAPMStart);
             i++;
         }
     }

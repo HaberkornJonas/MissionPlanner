@@ -18,6 +18,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using SvgNet.SvgGdi;
 using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
+using System.Diagnostics;
 
 
 // Control written by Michael Oborne 2011
@@ -27,7 +28,7 @@ namespace MissionPlanner.Controls
 {
     public class HUD : GLControl
     {
-        private static readonly ILog log =
+        public static readonly ILog log =
             LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private object paintlock = new object();
@@ -1658,6 +1659,8 @@ namespace MissionPlanner.Controls
 
         //Added for the Thesis
         public static ModuleStatus CurentModuleStatus { get; set; } = new ModuleStatus(-1,"","","", null,-1);
+        int LastModuleNumber = -1;
+
         ///	<summary>
         ///	ThesisMessageEvent Handler.
         ///	Update the HUD with the infos comming from the message.
@@ -1668,40 +1671,29 @@ namespace MissionPlanner.Controls
         {
             if (args == null)
                 throw new ArgumentNullException();
-            string message = args.Message;
-            if (message.StartsWith("\nThesis:"))
+            ModuleStatus temporaryModuleStatus = null;
+            try
             {
-                String[] tmpData = message.Split('/');
-                if (tmpData[tmpData.Length-1].EndsWith(";"))
+                temporaryModuleStatus = new ModuleStatus(args);
+                if (temporaryModuleStatus == null)
                 {
-                    int messageNumber = Int32.Parse(tmpData[0].Split(':')[1]);
-                    string longitude = tmpData[1].Split(':')[1];
-                    string latitude = tmpData[2].Split(':')[1];
-                    string altitude = tmpData[3].Split(':')[1];
-                    int moduleNumber = Int32.Parse(tmpData[4].Split(':')[1]);
-                    List<string> param = new List<string>();
-                    try
-                    {
-                        for (int i = 5; i < (5 + ModuleStatus.GetNumberParameter(moduleNumber)); i++)
-                        {
-                            param.Add(tmpData[i].Split(':')[1]);
-                        }
-                        CurentModuleStatus = new ModuleStatus(moduleNumber, longitude, latitude, altitude, param.ToArray(), messageNumber);
-                        return;
-                    }catch(Exception e)
-                    {
-                        log.Error(e.Message);
-                    }
+                    log.Error("Thesis Message could not be handled, received message : " + args.Message);
+                }
+                else
+                {
+                    CurentModuleStatus = temporaryModuleStatus;
                 }
             }
-            log.Error("Thesis Message could not be handled, received message : " + args.Message);
+            catch(Exception e)
+            {
+                log.Error(e.Message);
+                log.Error("Thesis Message could not be handled, received message : " + args.Message);
+            }
+            
         }
-
-        
 
         void doPaint()
         {
-            //Console.WriteLine("hud paint "+DateTime.Now.Millisecond);
             bool isNaN = false;
             try
             {
@@ -2583,16 +2575,19 @@ namespace MissionPlanner.Controls
                 //added for the Thesis
                 if (displaymodule || true)
                 {
-                    modulehitzone = new Rectangle(fontsize*2, this.Height - 30 - fontoffset, fontsize*8,
-                        fontsize * 3);
+                    int localModuleNumber;
+                    if (CurentModuleStatus.MessageNumberAPM != -1)
+                        LastModuleNumber = CurentModuleStatus.ModuleNumber;
+                    localModuleNumber = LastModuleNumber;
+                    modulehitzone = new Rectangle(fontsize*2, this.Height - 30 - fontoffset, fontsize*8, fontsize * 3);
                     string status;
                     SolidBrush col;
-                    if (CurentModuleStatus.ModuleNumber > 0)
+                    if (localModuleNumber > 0)
                     {
                         status = ModuleStatus.GetModuleName(CurentModuleStatus.ModuleNumber);
                         col = _whiteBrush;
                     }
-                    else if (CurentModuleStatus.ModuleNumber == 0)
+                    else if (localModuleNumber == 0)
                     {
                         status = $"No Module";
                         col = (SolidBrush)Brushes.Orange;

@@ -285,9 +285,6 @@
             this.hud1.DataBindings.Add(new System.Windows.Forms.Binding("disttowp", this.bindingSourceHud, "wp_dist", true));
             this.hud1.DataBindings.Add(new System.Windows.Forms.Binding("ekfstatus", this.bindingSourceHud, "ekfstatus", true));
 
-            //added for the Thesis
-            //this.hud1.DataBindings.Add(new System.Windows.Forms.Binding("modulstatus", this.bindingSourceHud, "modulestatus", true));
-
             this.hud1.DataBindings.Add(new System.Windows.Forms.Binding("failsafe", this.bindingSourceHud, "failsafe", true));
             this.hud1.DataBindings.Add(new System.Windows.Forms.Binding("gpsfix", this.bindingSourceHud, "gpsstatus", true));
             this.hud1.DataBindings.Add(new System.Windows.Forms.Binding("gpsfix2", this.bindingSourceHud, "gpsstatus2", true));
@@ -325,9 +322,6 @@
             this.hud1.distunit = null;
             resources.ApplyResources(this.hud1, "hud1");
             this.hud1.ekfstatus = 0F;
-
-            //added for the Thesis
-            //this.hud1.modulstatus = "No Module";
 
             this.hud1.failsafe = false;
             this.hud1.gpsfix = 0F;

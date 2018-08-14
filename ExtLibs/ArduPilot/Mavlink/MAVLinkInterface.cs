@@ -3310,13 +3310,22 @@ Please check the following
                                 if (buildplaintxtline.Length > 3)
                                     plaintxtline = buildplaintxtline;
 
-                                log.Info(plaintxtline);
+                                //log.Info(plaintxtline);
 
                                 //Added for the Thesis
-                                if(plaintxtline.Contains("Thesis:"))
+                                if (plaintxtline.StartsWith("\nAPM:"))
                                 {
-                                    ThesisMessage?.Invoke(this, new ThesisMessageEventArgs(plaintxtline));
+                                    try
+                                    {
+                                        ThesisMessage?.Invoke(this, new ThesisMessageEventArgs(plaintxtline));
+                                        log.Info(plaintxtline);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        log.Error("Thesis Message could not be handled");
+                                    }
                                 }
+                                plaintxtline = "";
 
                                 // reset for next line
                                 buildplaintxtline = "";
